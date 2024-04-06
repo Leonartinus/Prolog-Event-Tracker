@@ -26,14 +26,6 @@ before(date(YYYY, MM, DD1), date(YYYY, MM, DD2)) :- DD2 > DD1.
 % after(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2)) is true if date1 is after date2.
 after(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2)) :- not(before(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2))), dif(DD1, DD2).
 
-
-% event(N, date(YYYY, MM, DD)) is true if the date is a valid date
-event(N, date(YYYY, MM, DD)) :- date(YYYY, MM, DD).
-
-event("BD", date(2024, 4, 17)).
-event("home", date(2024, 4, 28)).
-
-
 % daysDiff(date1, date2, D) is true if the days difference between date1 and date2 is D
 daysDiff(date(YYYY, MM, DD), date(YYYY, MM, DD), 0).
 daysDiff(date(YYYY, MM, DD1), date(YYYY, MM, DD2), D) :- 
@@ -57,6 +49,32 @@ daysDiff(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2), D) :-
     daysDiff(date(YYYY2, MM2, DD2), date(YYYY1, MM1, DD1), DN),
     D is -DN.
 
+/*
 % eventAfter(Date, Event) is true if the Event is after the Date
-eventAfter(date(YYYY, MM, DD), event(_, date(YYYY1, MM1, DD1))) :-
-    before(date(YYYY, MM, DD), date(YYYY1, MM1, DD1)).            %%%%%%%%%%%%%%%%%%%% TODO
+% eventAfter(date(YYYY, MM, DD), event(_, date, date(YYYY1, MM1, DD1))) :-
+%     before(date(YYYY, MM, DD), date(YYYY1, MM1, DD1)).            %%%%%%%%%%%%%%%%%%%% TODO
+
+% Pertaining to events:
+% Reified events, this way we can add new aspects to the events much more easily
+% Names must be unique
+% now event(eventid, Property, Value)
+event(bd, date, date(2024, 4, 17)).
+event(bd, name, "BD").
+event(bd1, date, date(2024, 3, 17)).
+event(bd1, name, "BD").
+event(home, date, date(2024, 4, 28)).
+event(home, name, "home").
+
+% returns true if there is no events occuring on the same date with the same name.
+addEvent(N, date(YYYY, MM, DD)) :- 
+    date(YYYY, MM, DD), string(N),
+    not(lookupEvent(N, date(YYYY, MM, DD))).
+    % notSameNameAndDate(N, date(YYYY, MM, DD)).
+
+notSameNameAndDate(N, date(YYYY, MM, DD)) :- not(event(_, date, date(YYYY, MM, DD))), not(event(_, name, N)).
+
+% returns true is the event with the same name exists.
+lookupEvent(N, D) :- event(_, name, N), event(date, D).
+
+% define a database for the events in a calendar? maybe in JSON? 
+*/
