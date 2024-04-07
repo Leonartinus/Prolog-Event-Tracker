@@ -51,8 +51,13 @@ daysDiff(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2), D) :-
     D is -DN.
 
 % eventAfter(Date, Event) is true if the Event is after the Date
-eventAfter(date(YYYY, MM, DD), event(_, date, date(YYYY1, MM1, DD1))) :-
-    before(date(YYYY, MM, DD), date(YYYY1, MM1, DD1)).            %%%%%%%%%%%%%%%%%%%% TODO
+eventAfter(date(YYYY, MM, DD), Names) :-
+    findall(ID, (event(ID, date, Date), before(date(YYYY, MM, DD), Date)), EventIDs),
+    findEventName(EventIDs, Names).
+
+% find event names given ids
+findEventName(IDs, Names) :-
+    findall(N, (event(ID, name, N), member(ID, IDs)), Names).
 
 % Pertaining to events:
 % Reified events, this way we can add new aspects to the events much more easily
