@@ -24,8 +24,12 @@ before(date(YYYY, MM1, _), date(YYYY, MM2, _)) :- MM2 > MM1.
 before(date(YYYY, MM, DD1), date(YYYY, MM, DD2)) :- DD2 > DD1.
 
 % after(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2)) is true if date1 is after date2.
-after(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2)) :- not(before(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2))), dif(DD1, DD2).
+after(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2)) :- 
+    not(before(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2))),
+    not(same(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2))).
 
+% same is true if 2 dates are the same.
+same(date(Y,M,D), date(Y,M,D)).
 
 % daysDiff(date1, date2, D) is true if the days difference between date1 and date2 is D
 daysDiff(date(YYYY, MM, DD), date(YYYY, MM, DD), 0).
@@ -51,13 +55,30 @@ daysDiff(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2), D) :-
     D is -DN.
 
 % eventAfter(Date, Event) is true if the Event is after the Date
-eventAfter(date(YYYY, MM, DD), Names) :-
-    findall(ID, (event(ID, date, Date), before(date(YYYY, MM, DD), Date)), EventIDs),
-    findEventName(EventIDs, Names).
+eventAfter(Date0, Names) :-
+    findall(event(ID, date, Date), (event(ID, date, Date), before(Date0, Date)), Events),
+    sort_events_by_date(Events, SortedEvents),
+    findEventName(SortedEvents, Names).
 
 % find event names given ids
-findEventName(IDs, Names) :-
-    findall(N, (event(ID, name, N), member(ID, IDs)), Names).
+findEventName(Events, Names) :-
+    findall(N, (event(ID, name, N), member(event(ID, date, _), Events)), Names).
+
+% Custom comparison function: Compare events based on their date
+compare_events_by_date(<, event(ID1, date, Date1), event(ID2, date, Date2)) :-
+    before(Date1, Date2).
+
+compare_events_by_date(>, event(ID1, date, Date1), event(ID2, date, Date2)) :-
+    after(Date1, Date2).
+
+compare_events_by_date(=, event(ID1, date, date(Y,M,D)), event(ID2, date, date(Y,M,D))).
+
+
+
+% Sort the list of events based on their date
+sort_events_by_date(Events, SortedEvents) :-
+    predsort(compare_events_by_date, Events, SortedEvents).
+
 
 % Pertaining to events:
 % Reified events, this way we can add new aspects to the events much more easily
