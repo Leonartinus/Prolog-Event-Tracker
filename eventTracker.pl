@@ -55,30 +55,38 @@ daysDiff(date(YYYY1, MM1, DD1), date(YYYY2, MM2, DD2), D) :-
     D is -DN.
 
 % eventAfter(Date, Event) is true if the Event is after the Date
-eventAfter(Date0, Names) :-
+eventAfter(Date0, SortedEvents) :-
     findall(event(ID, date, Date), (event(ID, date, Date), before(Date0, Date)), Events),
-    sort_events_by_date(Events, SortedEvents),
-    findEventName(SortedEvents, Names).
+    findEventName(Events, Names),
+    sort_events_by_date(Names, SortedEvents).
 
 % find event names given ids
 findEventName(Events, Names) :-
-    findall(N, (event(ID, name, N), member(event(ID, date, _), Events)), Names).
+    findall((ID, N,D), (event(ID, name, N), member(event(ID, date, D), Events)), Names).
 
 % Custom comparison function: Compare events based on their date
-compare_events_by_date(<, event(ID1, date, Date1), event(ID2, date, Date2)) :-
+compare_events_by_date(<, (ID1, N1, Date1), (ID2, N2, Date2)) :-
     before(Date1, Date2).
 
-compare_events_by_date(>, event(ID1, date, Date1), event(ID2, date, Date2)) :-
+compare_events_by_date(>, (ID1, N1, Date1), (ID2, N2, Date2)) :-
     after(Date1, Date2).
 
-compare_events_by_date(=, event(ID1, date, date(Y,M,D)), event(ID2, date, date(Y,M,D))).
-
-
+compare_events_by_date(=, (ID1, N1, date(Y,M,D)), (ID2, N2, date(Y,M,D))).
 
 % Sort the list of events based on their date
 sort_events_by_date(Events, SortedEvents) :-
     predsort(compare_events_by_date, Events, SortedEvents).
 
+
+% returns the next Event of the given date
+nextEvent(Date0, E) :-
+    findall(event(ID, date, Date), (event(ID, date, Date), before(Date0, Date)), Events),
+    findEventName(Events, Names),
+    sort_events_by_date(Names, SortedEvents),
+    head(SortedEvents, E).
+
+% head is true if H is the head of the list
+head([H|_], H).
 
 % Pertaining to events:
 % Reified events, this way we can add new aspects to the events much more easily
@@ -90,6 +98,8 @@ event(bd1, date, date(2024, 3, 17)).
 event(bd1, name, "BD").
 event(home, date, date(2024, 4, 28)).
 event(home, name, "home").
+event(interview, date, date(2024, 4, 24)).
+event(interview, name, "interview").
 
 % returns true if there is no events occuring on the same date with the same name.
 addEvent(N, date(YYYY, MM, DD)) :- 
