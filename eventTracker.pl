@@ -128,15 +128,17 @@ addEvent(N, date(YYYY, MM, DD)) :-
 
 "Is 2002, 11, 25 free?"
 
+"When is BD?"
+"Where is BD?"
+"What events happen in ballroom?"
+
+Todo:
+
 "When is the next available day after 2022, 5, 6?"
 "When is the next available time on 2012, 6, 5?"
 
-"When is BD?"
-"Where is BD?"
-
 "What events happen on 2023, 9, 4?"
 "What events happen on 2023, 9, 4 at 21:00?"
-"What events happen in the ballroom?"
 "What events happen on 2023, 9, 4 at 21:00 in the ballroom?
 */
 
@@ -171,14 +173,6 @@ mp(["that" | L0], L2, Subject) :-
     reln(L0, L1, Subject, Object), 
     aphrase(L1, L2, Object).
 
-% reln(L0,L1,Sub,Obj) is true if L0-L1 is a relation on individuals Sub and Obj
-reln(["borders" | L], L, Sub, Obj) :- borders(Sub, Obj).
-reln(["bordering" | L], L, Sub, Obj) :- borders(Sub, Obj).
-reln(["next", "to" | L], L, Sub, Obj) :- borders(Sub, Obj).
-reln(["the", "capital", "of" | L], L, Sub, Obj) :- capital(Obj, Sub).
-reln(["the", "name", "of" | L], L, Sub, Obj) :- name(Obj, Sub).
-% reln(["free", "on" | L], L, P, D) :- findall()
-
 % An optional modifying phrase is either a modifying phrase or nothing
 omp(L0,L1,E) :-
     mp(L0,L1,E).
@@ -190,7 +184,9 @@ dphrase([Y | [M | [D | _]]], date(YN, MN, DN)) :-
     number_string(MN, M),
     number_string(DN, D),
     date(YN, MN, DN).
-dphrase([N | _], D) :-
+
+% get the date from name
+gdphrase([N | _], D) :-
     event(ID, name, N),
     event(ID, date, D).
 % try dphrase(["2002","3","6","isdlfkj"], D).
@@ -199,6 +195,11 @@ dphrase([N | _], D) :-
 lphrase([N | _], P) :-
     event(ID, name, N),
     event(ID, place, P).
+
+% get name from place
+glphrase([P | _], N) :-
+    event(ID, place, P),
+    event(ID, name, N).
 
 % a phrase is a noun_phrase or a modifying phrase
 aphrase(L0, L1, E) :- noun_phrase(L0, L1, E).
@@ -229,15 +230,14 @@ question(["Can", "I", "add", "an", "event", "on" | L0], _, Ans) :-
 question(["Where", "is" | L0], _, Ind) :-
     lphrase(L0, Ind).
 question(["When", "is" | L0], _, Ind) :-
-    dphrase(L0, Ind).
+    gdphrase(L0, Ind).
+question(["What", "happens", "on" | L0], _, Ind) :-
+   dphrase(L0, D),
+   event(ID, date, D),
+   event(ID, name, Ind).
+question(["What", "happens", "in" | L0], _, Ind) :-
+    glphrase(L0, Ind).
 
-question(["What", "is" | L0], L1, Ind) :-
-    aphrase(L0, L1, Ind).
-question(["What" | L0], L2, Ind) :-
-    noun_phrase(L0, L1, Ind), 
-    mp(L1, L2, Ind).
-question(["What" | L0], L1, Ind) :-
-    mp(L0, L1, Ind).
 
 % ask(Q, A) gives answer A to question Q
 ask(Q, A) :-
@@ -252,7 +252,7 @@ q(Ans) :-
     read_line_to_string(user_input, St),
     notin(St, ["quit", "quit.", "q", "q."]), % quit or q ends interaction
     split_string(St, " -", " ,?.!-", Ln), % ignore punctuation
-    write(Ln),
+    % write(Ln),
     (ask(Ln, Ans)  
     ;  write("No more answers\n"),  % ; is "or"
       q(Ans)).
