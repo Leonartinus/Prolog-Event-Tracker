@@ -130,7 +130,7 @@ addEvent(N, date(YYYY, MM, DD)) :-
 
 "When is BD?"
 "Where is BD?"
-"What events happen in ballroom?"
+"What happens in ballroom?"
 
 Todo:
 
@@ -274,6 +274,6 @@ event(home, name, "home").
 event(home, place, "123 smiling ave").
 event(interview, date, date(2024, 4, 24)).
 event(interview, name, "interview").
-event(interview, place, "zoom").
+event(interview, place, "ballroom").
 
 wr(D) :- write(D).

@@ -11,3 +11,4 @@ event(home, name, "home").
 event(home, place, "123 smiling ave").
 event(interview, date, date(2024, 4, 24)).
 event(interview, name, "interview").
+event(interview, place, "ballroom").
