@@ -103,13 +103,22 @@ event(interview, name, "interview").
 
 % returns true if there is no events occuring on the same date with the same name.
 addEvent(N, date(YYYY, MM, DD)) :- 
-    date(YYYY, MM, DD), string(N),
-    not(lookupEvent(N, date(YYYY, MM, DD))).
-    % notSameNameAndDate(N, date(YYYY, MM, DD)).
+    date(YYYY, MM, DD), 
+    string(N),
+    lookupEvent(_, name, N),
+    not(lookupEvent(_, date, date(YYYY, MM, DD))).
+addEvent(N, date(YYYY, MM, DD)) :- 
+    date(YYYY, MM, DD), 
+    string(N),
+    lookupEvent(_, date, date(YYYY, MM, DD)),
+    not(lookupEvent(_, name, N)).
+addEvent(N, date(YYYY, MM, DD)) :- 
+    date(YYYY, MM, DD), 
+    string(N),
+    not(lookupEvent(_, date, date(YYYY, MM, DD))),
+    not(lookupEvent(_, name, N)).
 
-notSameNameAndDate(N, date(YYYY, MM, DD)) :- not(event(_, date, date(YYYY, MM, DD))), not(event(_, name, N)).
-
-% returns true is the event with the same name exists.
-lookupEvent(N, D) :- event(_, name, N), event(date, D).
+% returns true is the event with the same property value exists.
+lookupEvent(ID, P, V) :- event(ID, P, V).
 
 % define a database for the events in a calendar? maybe in JSON? 
